@@ -129,12 +129,18 @@ $startButton.Add_Click({
     Log-Message "Extraction completed."
     
     Log-Message "Installing USB driver from android_winusb.inf"
-    Log-Message "This requires Admin privledges.  You may see a prompt.  Accept it."
-    Start-Sleep -Seconds 5
+    $messageBox = [System.Windows.Forms.MessageBox]::Show(
+        "This requires Admin privileges. You may see a prompt, please accept it. If you don't accept the prompt and install the drivers, MBF Bridge may not function correctly.",
+        "Admin Privileges Required",
+        [System.Windows.Forms.MessageBoxButtons]::OK,
+        [System.Windows.Forms.MessageBoxIcon]::Warning
+    )
 
-    $infPath = "$tempDir\AndroidUSB\android_winusb.inf"
-    Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"pnputil /add-driver `"$infPath`" /install`"" -Verb RunAs
-    Log-Message "USB driver installed successfully."
+    if ($messageBox -eq [System.Windows.Forms.DialogResult]::OK) {
+        $infPath = "$tempDir\AndroidUSB\android_winusb.inf"
+        Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"pnputil /add-driver `"$infPath`" /install`"" -Verb RunAs
+        Log-Message "USB driver installed successfully."
+    }
     
     Log-Message "Downloading the MBF Bridge from the provided URL."
     $bridgeZipPath = "$tempDir\MBFBridge.zip"
@@ -153,7 +159,17 @@ $startButton.Add_Click({
     }
     Log-Message "Found executable: $($exeFile.FullName)"
 
-    Log-Message "Prompting user to save the executable."
+    $messageBox = [System.Windows.Forms.MessageBox]::Show(
+        "You will now be asked where you want to save the MBF Bridge application. It will default to your Desktop. Choose where you want to save it.",
+        "Save Location",
+        [System.Windows.Forms.MessageBoxButtons]::OK,
+        [System.Windows.Forms.MessageBoxIcon]::Information
+    )
+    if ($messageBox -ne [System.Windows.Forms.DialogResult]::OK) {
+        Log-Message "Operation canceled by the user."
+        return
+    }
+
     $saveFileDialog = New-Object System.Windows.Forms.SaveFileDialog
     $saveFileDialog.InitialDirectory = [Environment]::GetFolderPath("Desktop")
     $saveFileDialog.Filter = "Executable Files (*.exe)|*.exe"
@@ -164,9 +180,46 @@ $startButton.Add_Click({
         Log-Message "Saving executable to: $destinationPath"
         Copy-Item -Path $exeFile.FullName -Destination $destinationPath -Force
         Log-Message "Executable saved successfully."
+
+        # Close the current form
+        $form.Close()
+
+        # Create a new form for the "How do I use this?" message
+        $infoForm = New-Object System.Windows.Forms.Form
+        $infoForm.Text = "How to Use MBF Bridge"
+        $infoForm.Size = New-Object System.Drawing.Size(600, 300)
+        $infoForm.StartPosition = "CenterScreen"
+
+        # Create a label for the message
+        $infoLabel = New-Object System.Windows.Forms.Label
+        $infoLabel.Location = New-Object System.Drawing.Point(10, 10)
+        $infoLabel.Size = New-Object System.Drawing.Size(560, 240)
+        $infoLabel.Font = New-Object System.Drawing.Font("Arial", 12, [System.Drawing.FontStyle]::Regular)
+        $infoLabel.Text = "How do I use this?`r`n`r`n" +
+                  "When you open the executable, it will create an icon in your system tray.`r`n" +
+                  "It will also automatically open the MBF Website.`r`n`r`n" +
+                  "You can open MBF at any time by either opening the executable or by clicking the icon in your system tray."
+        $infoLabel.AutoSize = $false
+        $infoLabel.TextAlign = "TopLeft"
+        $infoLabel.BorderStyle = "FixedSingle"
+        $infoLabel.Size = New-Object System.Drawing.Size(560, 200)
+        $infoForm.Controls.Add($infoLabel)
+
+        # Create a close button
+        $closeButton = New-Object System.Windows.Forms.Button
+        $closeButton.Text = "Close"
+        $closeButton.Size = New-Object System.Drawing.Size(100, 30)
+        $closeButton.Location = New-Object System.Drawing.Point(250, 220)
+        $closeButton.Add_Click({ $infoForm.Close() })
+        $infoForm.Controls.Add($closeButton)
+
+        # Show the new form
+        [void]$infoForm.ShowDialog()
     } else {
         Log-Message "Save operation canceled by the user."
+        Log-Message "Please re-run this application and save the file where you want it."
     }
+
 
 })
 
