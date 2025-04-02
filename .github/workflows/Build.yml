@@ -35,15 +35,7 @@ jobs:
     
               - name: Compile installer.ps1 to installer.exe
                 run: |
-                  $iconBase64 = [Convert]::ToBase64String((Get-Content .\favicon.ico -AsByteStream))
-                  $content = Get-Content .\installer.ps1
-
-                  [regex]$pattern = "ICON_PLACEHOLDER"
-                  $pattern.replace($content, $iconBase64, 1)
-                  Set-Content .\installer_with_icon.ps1 $content
-                  $lineWithIconBase64 = $content | Select-String -Pattern '\$iconBase64'
-                  Write-Output $lineWithIconBase64
-                  Invoke-ps2exe .\installer_with_icon.ps1 .\MBF-Bridge-Installer.exe -noConsole -iconFile .\favicon.ico
+                  Invoke-ps2exe .\installer.ps1 .\MBF-Bridge-Installer.exe -noConsole -iconFile .\favicon.ico
                 shell: pwsh
     
               - name: Upload installer.exe as artifact
