@@ -38,43 +38,42 @@ jobs:
                   name: MBF-Bridge-Installer
                   path: MBF-Bridge-Installer.exe
 
-    release:
-        needs: build
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+              - name: Get commit message
+                id: get_commit_message
+                run: |
+                  $message = (git log -1 --pretty=%B | Out-String).Trim()
+                  echo "message=$message" >> $env:GITHUB_ENV
+                  Set-Content -Path message.txt -Value $message
+                shell: pwsh
 
-            - name: Get commit message
-              id: get_commit_message
-              run: |
-                echo "message=$(git log -1 --pretty=%B | head -n 1)" >> $GITHUB_ENV
-                echo "${{ env.full_message }}" > message.txt
-
-
-            - name: Check if commit message is a version
-              id: check_version
-              run: |
-                if [[ "${{ env.message }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-                  echo "is_version=true" >> $GITHUB_ENV
-                  echo "version=${{ env.message }}" >> $GITHUB_ENV
-                else
-                  echo "is_version=false" >> $GITHUB_ENV
-                fi
-
-            - name: Release
-              uses: softprops/action-gh-release@v2
-              if: env.is_version == 'true'
-              with:
-                token: ${{ github.token }}
-                body_path: message.txt
-                tag_name: ${{ env.version }}              
-
-            - name: Upload installer to release
-              if: env.is_version == 'true'
-              uses: actions/upload-release-asset@v1
-              with:
-                  upload_url: ${{ steps.create_release.outputs.upload_url }}
-                  asset_path: ./MBF-Bridge-Installer.exe
-                  asset_name: MBF-Bridge-Installer.exe
-                  asset_content_type: application/octet-streamy
+              - name: Check if commit message is a version
+                id: check_version
+                run: |
+                  if ($env:message -match '^v[0-9]+\.[0-9]+\.[0-9]+') {
+                  echo "is_version=true" >> $env:GITHUB_ENV
+                  echo "version=$env:message" >> $env:GITHUB_ENV
+                  } else {
+                  echo "is_version=false" >> $env:GITHUB_ENV
+                  }
+                shell: pwsh
+     
+                    
+              - name: Create Release
+                id: create_release
+                uses: actions/create-release@v1
+                env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                with:
+                  tag_name: ${{ env.version }}   
+                  release_name: Release ${{ env.version }}  
+                  draft: false
+                  prerelease: false
+    
+              - name: Upload installer to release
+                if: env.is_version == 'true'
+                uses: actions/upload-release-asset@v1
+                with:
+                    upload_url: ${{ steps.create_release.outputs.upload_url }}
+                    asset_path: ./MBF-Bridge-Installer.exe
+                    asset_name: MBF-Bridge-Installer.exe
+                    asset_content_type: application/octet-streamy
