@@ -72,12 +72,9 @@ jobs:
               with:
                 tag_name: ${{ env.message }}
                 release_name: ${{ env.message }}
-                body: |
-                  ${{ env.full_message }}
+                body: ${{ env.message }}
                 draft: false
                 prerelease: false
-
-                
 
             - name: Upload installer to release
               if: env.is_version == 'true'
