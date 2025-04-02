@@ -19,9 +19,11 @@ jobs:
                   Invoke-WebRequest -Uri "https://mbf.bsquest.xyz/favicon.png" -OutFile "favicon.png"
                 shell: pwsh
 
-              - name: Install ps2exe
-                run: Install-Module -Name ps2exe -Force -Scope CurrentUser -AllowClobber
-                shell: pwsh
+              - name: Install and cache PowerShell modules
+                uses: potatoqualitee/psmodulecache@v6.0
+                with:
+                  modules-to-cache: ps2exe
+                  updatable: true
 
               - name: Install ImageMagick
                 run: choco install imagemagick --yes
