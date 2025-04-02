@@ -71,6 +71,8 @@ jobs:
                   tag_name: ${{ steps.extract_version.outputs.version }}
                   release_name: Release ${{ steps.extract_version.outputs.version }}
                   body: ${{ steps.extract_version.outputs.release_notes }}
+                  draft: false
+                  prerelease: false
                 env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
