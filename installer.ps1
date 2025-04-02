@@ -12,7 +12,7 @@ Add-Type -AssemblyName System.Windows.Forms
 
 # Create Form
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "MBF Launcher Installer"
+$form.Text = "MBF Bridge Installer"
 $form.Size = New-Object System.Drawing.Size(800,500)
 $form.StartPosition = "CenterScreen"
 
@@ -21,7 +21,7 @@ $label = New-Object System.Windows.Forms.Label
 $label.Location = New-Object System.Drawing.Point(10,10)
 $label.Size = New-Object System.Drawing.Size(760,50)
 $label.Font = New-Object System.Drawing.Font("Arial",14,[System.Drawing.FontStyle]::Bold)
-$label.Text = "Welcome to the MBF Launcher Installer. Click 'Start' to begin."
+$label.Text = "Welcome to the MBF Bridge Installer. Click 'Start' to begin."
 $form.Controls.Add($label)
 
 # Create TextBox for output
