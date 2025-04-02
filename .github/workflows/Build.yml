@@ -29,6 +29,11 @@ jobs:
                     $File = Get-Item -Path ".\favicon.png"
                     $Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($File.FullName)
                     $Icon.ToBitmap().Save($File.FullName.Replace($File.Extension, '.ico'))
+
+              - name: List contents of the directory
+                run: Get-ChildItem -Path .\ -Recurse | Select-Object FullName, Length, LastWriteTime
+                shell: pwsh
+
               - name: Compile installer.ps1 to installer.exe
                 run: |
                   Invoke-ps2exe -inputFile .\installer.ps1 -outputFile .\MBF-Bridge-Installer.exe -verbose -iconFile .\favicon.ico
