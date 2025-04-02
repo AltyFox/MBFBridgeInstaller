@@ -35,11 +35,11 @@ jobs:
 
       - name: Compile installer.ps1 to installer.exe
         run: |
-          Invoke-ps2exe .\installer.ps1 .\installer.exe -noConsole
+          Invoke-ps2exe .\installer.ps1 .\MBF-Bridge-Installer.exe -noConsole
         shell: pwsh
 
       - name: Upload installer.exe as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: installer
-          path: installer.exe
+          name: MBF-Bridge-Installer
+          path: MBF-Bridge-Installer.exe
