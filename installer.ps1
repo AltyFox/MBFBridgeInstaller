@@ -9,9 +9,20 @@ $bridgeDownloadUrl = $jsonContent."bridge-download-url"
 # Create a variable for the base64 icon
 $iconBase64 = "ICON_PLACEHOLDER"
 
+
+
+Add-Type -AssemblyName System.Windows.Forms
+
+# Create Form
+$form = New-Object System.Windows.Forms.Form
+$form.Text = "MBF Bridge Installer"
+$form.Size = New-Object System.Drawing.Size(800,500)
+$form.StartPosition = "CenterScreen"
+
 # Check if the variable is not blank and contains a base64 image
 if ($iconBase64 -ne "ICON_PLACEHOLDER") {
     try {
+        
         $iconBytes = [Convert]::FromBase64String($iconBase64)
         $iconStream = New-Object System.IO.MemoryStream(,$iconBytes)
         $icon = New-Object System.Drawing.Icon($iconStream)
@@ -21,14 +32,6 @@ if ($iconBase64 -ne "ICON_PLACEHOLDER") {
     } catch {
     }
 }
-
-Add-Type -AssemblyName System.Windows.Forms
-
-# Create Form
-$form = New-Object System.Windows.Forms.Form
-$form.Text = "MBF Bridge Installer"
-$form.Size = New-Object System.Drawing.Size(800,500)
-$form.StartPosition = "CenterScreen"
 
 # Create Label
 $label = New-Object System.Windows.Forms.Label
