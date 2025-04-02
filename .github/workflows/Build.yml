@@ -49,9 +49,7 @@ jobs:
               id: get_commit_message
               run: |
                 echo "message=$(git log -1 --pretty=%B | head -n 1)" >> $GITHUB_ENV
-                echo "full_message<<EOF" >> $GITHUB_ENV
-                git log -1 --pretty=%B >> $GITHUB_ENV
-                echo "EOF" >> $GITHUB_ENV
+                echo "${{ env.full_message }}" > message.txt
 
 
             - name: Check if commit message is a version
@@ -64,17 +62,16 @@ jobs:
                   echo "is_version=false" >> $GITHUB_ENV
                 fi
 
-            - name: Create Release
-              id: create_release
-              uses: actions/create-release@v1
-              env:
-               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+            - name: Release
+              uses: softprops/action-gh-release@v2
+              if: env.is_version == 'true'
               with:
-                tag_name: ${{ env.message }}
-                release_name: ${{ env.message }}
-                body: ${{ env.message }}
-                draft: false
-                prerelease: false
+                body_path: message.txt
+                # note you'll typically need to create a personal access token
+                # with permissions to create releases in the other repo
+                token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+
+                
 
             - name: Upload installer to release
               if: env.is_version == 'true'
