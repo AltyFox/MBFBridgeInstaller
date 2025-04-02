@@ -27,7 +27,7 @@ jobs:
                 run: |
                     Add-Type -AssemblyName System.Drawing
                     $File = Get-Item -Path ".\favicon.png"
-                    $Icon = [System.rawing.Icon]::ExtractAssociatedIcon($File.FullName)
+                    $Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($File.FullName)
                     $Icon.ToBitmap().Save($File.FullName.Replace($File.Extension, '.ico'))
               - name: Compile installer.ps1 to installer.exe
                 run: |
