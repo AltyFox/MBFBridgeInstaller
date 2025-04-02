@@ -66,6 +66,7 @@ jobs:
                   else
                     echo "No version tag found in commit message."
                     exit 0
+                  fi
                 shell: bash
     
               - name: Create GitHub Release
