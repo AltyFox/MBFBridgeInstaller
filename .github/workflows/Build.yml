@@ -66,13 +66,9 @@ jobs:
               uses: softprops/action-gh-release@v2
               if: env.is_version == 'true'
               with:
+                token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}  
                 body_path: message.txt
-                tag_name: ${{ env.version }}
-                # note you'll typically need to create a personal access token
-                # with permissions to create releases in the other repo
-                token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-
-                
+                tag_name: ${{ env.version }}              
 
             - name: Upload installer to release
               if: env.is_version == 'true'
