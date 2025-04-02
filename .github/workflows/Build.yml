@@ -12,26 +12,21 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Download favicon.png
         run: |
           Invoke-WebRequest -Uri "https://mbf.bsquest.xyz/favicon.png" -OutFile "favicon.png"
         shell: pwsh
 
-      - name: Convert PNG to ICO
+      - name: Install ImageMagick
         run: |
-          Add-Type -AssemblyName System.Drawing
-          $image = [System.Drawing.Image]::FromFile("favicon.png")
-          $icon = New-Object System.Drawing.Icon ([System.IO.MemoryStream]::new())
-          $stream = [System.IO.MemoryStream]::new()
-          $image.Save($stream, [System.Drawing.Imaging.ImageFormat]::Png)
-          $stream.Position = 0
-          $bitmap = New-Object System.Drawing.Bitmap ($stream)
-          $icon = [System.Drawing.Icon]::FromHandle($bitmap.GetHicon())
-          $fileStream = [System.IO.File]::Create("favicon.ico")
-          $icon.Save($fileStream)
-          $fileStream.Close()
+          choco install imagemagick --force
+        shell: pwsh
+
+      - name: Convert PNG to ICO using ImageMagick
+        run: |
+          magick convert favicon.png -define icon:auto-resize=16,32,48,64,128,256 favicon.ico
         shell: pwsh
 
       - name: Install ps2exe
@@ -44,7 +39,7 @@ jobs:
         shell: pwsh
 
       - name: Upload installer.exe as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: installer
           path: installer.exe
