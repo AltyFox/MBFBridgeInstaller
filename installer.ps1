@@ -1,6 +1,3 @@
-Write-Host "Starting the MBF Launcher installer script." -ForegroundColor Green
-Write-Host "You can ignore this console window."
-
 add-type -name user32 -namespace win32 -memberDefinition '[DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);'
 $consoleHandle = (get-process -id $pid).mainWindowHandle
 # Download JSON file and parse "bridge-download-url"
@@ -225,6 +222,3 @@ $startButton.Add_Click({
 
 # Show the form
 [void]$form.ShowDialog()
-
-# hide console
-[win32.user32]::showWindow($consoleHandle, 0)
