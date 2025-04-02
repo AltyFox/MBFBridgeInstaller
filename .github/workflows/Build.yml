@@ -61,10 +61,8 @@ jobs:
                   if [[ "$COMMIT_MESSAGE" =~ ^v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
                     VERSION="${BASH_REMATCH[1]}"
                     RELEASE_NOTES=$(echo "$COMMIT_MESSAGE" | sed -e "1d")
-                    echo "version=$VERSION" >> $GITHUB_ENV
-                    echo "release_notes<<EOF" >> $GITHUB_ENV
-                    echo "$RELEASE_NOTES" >> $GITHUB_ENV
-                    echo "EOF" >> $GITHUB_ENV
+                    echo "::set-output name=version::$VERSION"
+                    echo "::set-output name=release_notes::$RELEASE_NOTES"
                   else
                     echo "No version tag found in commit message."
                     exit 0
@@ -72,14 +70,12 @@ jobs:
                 shell: bash
     
               - name: Create GitHub Release
-                if: env.version != ''
+                if: steps.extract_version.outputs.version != ''
                 uses: actions/create-release@v1
                 with:
-                  tag_name: ${{ env.version }}
-                  release_name: Release ${{ env.version }}
-                  body: ${{ env.release_notes }}
-                  draft: false
-                  prerelease: false
+                  tag_name: ${{ steps.extract_version.outputs.version }}
+                  release_name: Release ${{ steps.extract_version.outputs.version }}
+                  body: ${{ steps.extract_version.outputs.release_notes }}
                 env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
