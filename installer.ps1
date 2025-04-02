@@ -4,7 +4,7 @@ Write-Host "You can ignore this console window."
 add-type -name user32 -namespace win32 -memberDefinition '[DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);'
 $consoleHandle = (get-process -id $pid).mainWindowHandle
 # Download JSON file and parse "bridge-download-url"
-$jsonUrl = "https://example.com/config.json"
+$jsonUrl = "https://raw.githubusercontent.com/AltyFox/MBFBridgeInstaller/refs/heads/main/config.json"
 $jsonFilePath = "$env:TEMP\config.json"
 Invoke-WebRequest -Uri $jsonUrl -OutFile $jsonFilePath
 $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
