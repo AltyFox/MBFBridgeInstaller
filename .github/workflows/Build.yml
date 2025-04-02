@@ -38,12 +38,11 @@ jobs:
                   name: MBF-Bridge-Installer
                   path: MBF-Bridge-Installer.exe
 
-              - name: Get commit message
+              - name: Get first line of commit message
                 id: get_commit_message
                 run: |
-                  $message = (git log -1 --pretty=%B | Out-String).Trim()
+                  $message = (git log -1 --pretty=%B | Out-String).Split("`n")[0].Trim()
                   echo "message=$message" >> $env:GITHUB_ENV
-                  Set-Content -Path message.txt -Value $message
                 shell: pwsh
 
               - name: Check if commit message is a version
@@ -59,6 +58,7 @@ jobs:
      
                     
               - name: Create Release
+                if: env.is_version == 'true'
                 id: create_release
                 uses: actions/create-release@v1
                 env:
@@ -70,7 +70,7 @@ jobs:
                   prerelease: false
     
               - name: Upload installer to release
-                if: env.is_version == 'true'
+
                 uses: actions/upload-release-asset@v1
                 with:
                     upload_url: ${{ steps.create_release.outputs.upload_url }}
