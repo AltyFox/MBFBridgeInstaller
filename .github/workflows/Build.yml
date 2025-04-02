@@ -26,7 +26,7 @@ jobs:
 
               - name: Convert PNG to ICO using ConvertTo-Icon.ps1
                 run: |
-                  .\ConvertTo-Icon.ps1 -Path .\favicon.png
+                  .\ConvertTo-Icon.ps1 .\favicon.png
                 shell: pwsh
     
               - name: Install ps2exe
