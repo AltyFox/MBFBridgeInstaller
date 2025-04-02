@@ -66,7 +66,7 @@ jobs:
               uses: softprops/action-gh-release@v2
               if: env.is_version == 'true'
               with:
-                token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}  
+                token: ${{ github.token }}
                 body_path: message.txt
                 tag_name: ${{ env.version }}              
 
