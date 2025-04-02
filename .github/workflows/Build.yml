@@ -35,7 +35,10 @@ jobs:
 
       - name: Compile installer.ps1 to installer.exe
         run: |
-          Invoke-ps2exe .\installer.ps1 .\MBF-Bridge-Installer.exe -noConsole
+          $content = Get-Content .\installer.ps1
+          $content = $content -replace 'ICON_PLACEHOLDER', (Resolve-Path .\favicon.ico)
+          Set-Content .\installer_with_icon.ps1 $content
+          Invoke-ps2exe .\installer_with_icon.ps1 .\MBF-Bridge-Installer.exe -noConsole
         shell: pwsh
 
       - name: Upload installer.exe as artifact
