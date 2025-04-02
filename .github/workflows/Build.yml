@@ -33,7 +33,7 @@ jobs:
 
               - name: Compile installer.ps1 to installer.exe
                 run: |
-                  Invoke-ps2exe -inputFile .\installer.ps1 -outputFile .\MBF-Bridge-Installer.exe -verbose -iconFile .\favicon.ico
+                  Invoke-ps2exe -inputFile .\installer.ps1 -outputFile .\MBF-Bridge-Installer.exe -verbose -iconFile .\favicon.ico -noConsole
                 shell: pwsh
     
               - name: Upload installer.exe as artifact
