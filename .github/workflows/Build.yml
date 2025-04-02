@@ -58,7 +58,7 @@ jobs:
                 id: extract_version
                 run: |
                   COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-                  if [[ "$COMMIT_MESSAGE" =~ ^#v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+                  if [[ "$COMMIT_MESSAGE" =~ ^v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
                     VERSION="${BASH_REMATCH[1]}"
                     RELEASE_NOTES=$(echo "$COMMIT_MESSAGE" | sed -e "1d")
                     echo "version=$VERSION" >> $GITHUB_ENV
