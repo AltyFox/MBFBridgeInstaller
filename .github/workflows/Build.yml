@@ -16,7 +16,7 @@ jobs:
 
               - name: Install and cache PowerShell modules
                 id: psmodulecache
-                uses: potatoqualitee/psmodulecache@v6.0
+                uses: potatoqualitee/psmodulecache@v6.2.1
                 with:
                   modules-to-cache: ps2exe
               - name: Show that the Action works
