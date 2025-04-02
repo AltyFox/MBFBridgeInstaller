@@ -24,13 +24,13 @@ jobs:
                   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nickrod518/PowerShell-Scripts/refs/heads/master/Data/ConvertTo-Icon.ps1" -OutFile "ConvertTo-Icon.ps1"
                 shell: pwsh
 
+              - name: Install ps2exe
+                run: Install-Module -Name ps2exe -Force -Scope CurrentUser -AllowClobber
+                shell: pwsh
+
               - name: Convert PNG to ICO using ConvertTo-Icon.ps1
                 run: |
                   .\ConvertTo-Icon.ps1 .\favicon.png
-                shell: pwsh
-    
-              - name: Install ps2exe
-                run: Install-Module -Name ps2exe -Force -Scope CurrentUser -AllowClobber
                 shell: pwsh
     
               - name: Compile installer.ps1 to installer.exe
@@ -43,7 +43,7 @@ jobs:
                   Set-Content .\installer_with_icon.ps1 $content
                   $lineWithIconBase64 = $content | Select-String -Pattern '\$iconBase64'
                   Write-Output $lineWithIconBase64
-                  Invoke-ps2exe .\installer_with_icon.ps1 .\MBF-Bridge-Installer.exe -noConsole
+                  Invoke-ps2exe .\installer_with_icon.ps1 .\MBF-Bridge-Installer.exe -noConsole -iconFile
                 shell: pwsh
     
               - name: Upload installer.exe as artifact

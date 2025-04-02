@@ -22,13 +22,12 @@ $form.StartPosition = "CenterScreen"
 # Check if the variable is not blank and contains a base64 image
 if ($iconBase64 -ne "ICON_PLACEHOLDER") {
     try {
-        
-        $iconBytes = [Convert]::FromBase64String($iconBase64)
-        $iconStream = New-Object System.IO.MemoryStream(,$iconBytes)
-        $icon = New-Object System.Drawing.Icon($iconStream)
 
-        # Apply the icon to all windows
-        $form.Icon = $icon
+        Add-Type -AssemblyName System.Drawing
+        $iconBytes = [Convert]::FromBase64String($base64Icon)
+        $memoryStream = New-Object System.IO.MemoryStream $iconBytes
+        $iconImage = [System.Drawing.Image]::FromStream($memoryStream)
+        $form.Icon = [System.Drawing.Icon]::FromHandle($iconImage.GetHicon())
     } catch {
     }
 }
