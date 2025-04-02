@@ -1,48 +1,88 @@
 name: Build Installer
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: windows-latest
+    build:
+        runs-on: windows-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+        steps:
+              - name: Checkout repository
+                uses: actions/checkout@v4
+    
+              - name: Download favicon.png
+                run: |
+                  Invoke-WebRequest -Uri "https://mbf.bsquest.xyz/favicon.png" -OutFile "favicon.png"
+                shell: pwsh
+    
+              - name: Install ImageMagick
+                run: |
+                  choco install imagemagick --force
+                shell: pwsh
+    
+              - name: Convert PNG to ICO using ImageMagick
+                run: |
+                  magick convert favicon.png -define icon:auto-resize=16,32,48,64,128,256 favicon.ico
+                shell: pwsh
+    
+              - name: Install ps2exe
+                run: Install-Module -Name ps2exe -Force -Scope CurrentUser -AllowClobber
+                shell: pwsh
+    
+              - name: Compile installer.ps1 to installer.exe
+                run: |
+                  $content = Get-Content .\installer.ps1
+                  $content = $content -replace 'ICON_PLACEHOLDER', (Resolve-Path .\favicon.ico)
+                  Set-Content .\installer_with_icon.ps1 $content
+                  Invoke-ps2exe .\installer_with_icon.ps1 .\MBF-Bridge-Installer.exe -noConsole
+                shell: pwsh
+    
+              - name: Upload installer.exe as artifact
+                uses: actions/upload-artifact@v4
+                with:
+                  name: MBF-Bridge-Installer
+                  path: MBF-Bridge-Installer.exe
 
-      - name: Download favicon.png
-        run: |
-          Invoke-WebRequest -Uri "https://mbf.bsquest.xyz/favicon.png" -OutFile "favicon.png"
-        shell: pwsh
-
-      - name: Install ImageMagick
-        run: |
-          choco install imagemagick --force
-        shell: pwsh
-
-      - name: Convert PNG to ICO using ImageMagick
-        run: |
-          magick convert favicon.png -define icon:auto-resize=16,32,48,64,128,256 favicon.ico
-        shell: pwsh
-
-      - name: Install ps2exe
-        run: Install-Module -Name ps2exe -Force -Scope CurrentUser -AllowClobber
-        shell: pwsh
-
-      - name: Compile installer.ps1 to installer.exe
-        run: |
-          $content = Get-Content .\installer.ps1
-          $content = $content -replace 'ICON_PLACEHOLDER', (Resolve-Path .\favicon.ico)
-          Set-Content .\installer_with_icon.ps1 $content
-          Invoke-ps2exe .\installer_with_icon.ps1 .\MBF-Bridge-Installer.exe -noConsole
-        shell: pwsh
-
-      - name: Upload installer.exe as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: MBF-Bridge-Installer
-          path: MBF-Bridge-Installer.exe
+    release:
+        runs-on: ubuntu-latest
+        needs: build
+        steps:
+              - name: Checkout repository
+                uses: actions/checkout@v4
+    
+              - name: Extract version and release notes from commit message
+                id: extract_version
+                run: |
+                  COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+                  if [[ "$COMMIT_MESSAGE" =~ ^#v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+                    VERSION="${BASH_REMATCH[1]}"
+                    RELEASE_NOTES=$(echo "$COMMIT_MESSAGE" | sed -e "1d")
+                    echo "version=$VERSION" >> $GITHUB_ENV
+                    echo "release_notes=$RELEASE_NOTES" >> $GITHUB_ENV
+                  else
+                    echo "No version tag found in commit message."
+                    exit 0
+                shell: bash
+    
+              - name: Create GitHub Release
+                if: env.version != ''
+                uses: actions/create-release@v1
+                with:
+                  tag_name: ${{ env.version }}
+                  release_name: Release ${{ env.version }}
+                  body: ${{ env.release_notes }}
+                  draft: false
+                  prerelease: false
+    
+              - name: Upload installer to release
+                if: env.version != ''
+                uses: actions/upload-release-asset@v1
+                with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./MBF-Bridge-Installer.exe
+                  asset_name: MBF-Bridge-Installer.exe
+                  asset_content_type: application/octet-stream
