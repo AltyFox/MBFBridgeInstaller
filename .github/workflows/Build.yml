@@ -12,7 +12,7 @@ jobs:
 
         steps:
         - name: Checkout code
-          uses: actions/checkout@v3
+          uses: actions/checkout@4
 
         - name: Set up PowerShell
           shell: pwsh
@@ -36,7 +36,7 @@ jobs:
             ps2exe -inputFile "MBF_Bridge.ps1" -outputFile "MBF_Bridge_Installer.exe" -iconFile "favicon.ico"
 
         - name: Upload artifact
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v3.1.2
           with:
             name: MBF_Bridge_Installer
             path: MBF_Bridge_Installer.exe
