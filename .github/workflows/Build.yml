@@ -22,10 +22,6 @@ jobs:
               - name: Install ps2exe
                 run: Install-Module -Name ps2exe -Force -Scope CurrentUser -AllowClobber
                 shell: pwsh
-
-              - name: Install ImageMagick
-                run: choco install imagemagick --yes
-                shell: pwsh
     
               - name: Convert the PNG to an Icon using ImageMagick
                 run: magick convert favicon.png favicon.ico
@@ -52,9 +48,7 @@ jobs:
             - name: Get commit message
               id: get_commit_message
               run: |
-                echo "message<<EOF" >> $GITHUB_ENV
-                git log -1 --pretty=%B >> $GITHUB_ENV
-                echo "EOF" >> $GITHUB_ENV
+                echo "message=$(git log -1 --pretty=%B | head -n 1)" >> $GITHUB_ENV
 
             - name: Check if commit message is a version
               id: check_version
