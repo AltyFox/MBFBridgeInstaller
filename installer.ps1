@@ -6,7 +6,21 @@ $jsonFilePath = "$env:TEMP\config.json"
 Invoke-WebRequest -Uri $jsonUrl -OutFile $jsonFilePath
 $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
 $bridgeDownloadUrl = $jsonContent."bridge-download-url"
+# Create a variable for the base64 icon
+$iconBase64 = "ICON_PLACEHOLDER"
 
+# Check if the variable is not blank and contains a base64 image
+if ($iconBase64 -ne "ICON_PLACEHOLDER") {
+    try {
+        $iconBytes = [Convert]::FromBase64String($iconBase64)
+        $iconStream = New-Object System.IO.MemoryStream(,$iconBytes)
+        $icon = New-Object System.Drawing.Icon($iconStream)
+
+        # Apply the icon to all windows
+        $form.Icon = $icon
+    } catch {
+    }
+}
 
 Add-Type -AssemblyName System.Windows.Forms
 

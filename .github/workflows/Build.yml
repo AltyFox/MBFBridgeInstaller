@@ -35,8 +35,9 @@ jobs:
     
               - name: Compile installer.ps1 to installer.exe
                 run: |
+                  $iconBase64 = [Convert]::ToBase64String((Get-Content .\favicon.ico -AsByteStream))
                   $content = Get-Content .\installer.ps1
-                  $content = $content -replace 'ICON_PLACEHOLDER', (Resolve-Path .\favicon.ico)
+                  $content = $content -replace 'ICON_PLACEHOLDER', $iconBase64
                   Set-Content .\installer_with_icon.ps1 $content
                   Invoke-ps2exe .\installer_with_icon.ps1 .\MBF-Bridge-Installer.exe -noConsole
                 shell: pwsh
