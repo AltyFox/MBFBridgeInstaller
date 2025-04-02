@@ -7,7 +7,6 @@ Invoke-WebRequest -Uri $jsonUrl -OutFile $jsonFilePath
 $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
 $bridgeDownloadUrl = $jsonContent."bridge-download-url"
 # Create a variable for the base64 icon
-$iconBase64 = "ICON_PLACEHOLDER"
 
 
 
@@ -19,18 +18,11 @@ $form.Text = "MBF Bridge Installer"
 $form.Size = New-Object System.Drawing.Size(800,500)
 $form.StartPosition = "CenterScreen"
 
-# Check if the variable is not blank and contains a base64 image
-if ($iconBase64 -ne "ICON_PLACEHOLDER") {
-    try {
 
-        Add-Type -AssemblyName System.Drawing
-        $iconBytes = [Convert]::FromBase64String($base64Icon)
-        $memoryStream = New-Object System.IO.MemoryStream $iconBytes
-        $iconImage = [System.Drawing.Image]::FromStream($memoryStream)
-        $form.Icon = [System.Drawing.Icon]::FromHandle($iconImage.GetHicon())
-    } catch {
-    }
-}
+
+# Get the icon of the current executable and set it as the form's icon
+$currentExePath = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
+$form.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($currentExePath)
 
 # Create Label
 $label = New-Object System.Windows.Forms.Label
@@ -183,6 +175,27 @@ $startButton.Add_Click({
         return
     }
 
+    # Kill any running process matching the name of the executable
+    $processName = [System.IO.Path]::GetFileNameWithoutExtension($exeFile.Name)
+    $runningProcesses = Get-Process -Name $processName -ErrorAction SilentlyContinue
+    if ($runningProcesses) {
+        Log-Message "Terminating running instances of $processName."
+        $runningProcesses | ForEach-Object { Stop-Process -Id $_.Id -Force }
+        Log-Message "All running instances of $processName have been terminated."
+    } else {
+        Log-Message "No running instances of $processName found."
+    }
+
+    # Kill any running instance of adb.exe
+    $adbProcesses = Get-Process -Name "adb" -ErrorAction SilentlyContinue
+    if ($adbProcesses) {
+        Log-Message "Terminating running instances of adb.exe."
+        $adbProcesses | ForEach-Object { Stop-Process -Id $_.Id -Force }
+        Log-Message "All running instances of adb.exe have been terminated."
+    } else {
+        Log-Message "No running instances of adb.exe found."
+    }
+
     $saveFileDialog = New-Object System.Windows.Forms.SaveFileDialog
     $saveFileDialog.InitialDirectory = [Environment]::GetFolderPath("Desktop")
     $saveFileDialog.Filter = "Executable Files (*.exe)|*.exe"
@@ -211,7 +224,8 @@ $startButton.Add_Click({
         $infoLabel.Text = "How do I use this?`r`n`r`n" +
                   "When you open the executable, it will create an icon in your system tray.`r`n" +
                   "It will also automatically open the MBF Website.`r`n`r`n" +
-                  "You can open MBF at any time by either opening the executable or by clicking the icon in your system tray."
+                  "You can open MBF at any time by either opening the executable or by clicking the icon in your system tray.`r`n`r`n"+
+                  "When you close this window, it will automatically open the application."
         $infoLabel.AutoSize = $false
         $infoLabel.TextAlign = "TopLeft"
         $infoLabel.BorderStyle = "FixedSingle"
@@ -223,7 +237,10 @@ $startButton.Add_Click({
         $closeButton.Text = "Close"
         $closeButton.Size = New-Object System.Drawing.Size(100, 30)
         $closeButton.Location = New-Object System.Drawing.Point(250, 220)
-        $closeButton.Add_Click({ $infoForm.Close() })
+        $closeButton.Add_Click({ 
+            Start-Process -FilePath $destinationPath
+            $infoForm.Close()
+        })
         $infoForm.Controls.Add($closeButton)
 
         # Show the new form
