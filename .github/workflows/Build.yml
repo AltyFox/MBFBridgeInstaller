@@ -22,17 +22,14 @@ jobs:
               - name: Install ps2exe
                 run: Install-Module -Name ps2exe -Force -Scope CurrentUser -AllowClobber
                 shell: pwsh
-    
-              - name: Convert the PNG to an Icon
-                run: |
-                    Add-Type -AssemblyName System.Drawing
-                    $File = Get-Item -Path ".\favicon.png"
-                    $Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($File.FullName)
-                    $Icon.ToBitmap().Save($File.FullName.Replace($File.Extension, '.ico'))
 
-              - name: List contents of the directory
-                run: Get-ChildItem -Path .\ -Recurse | Select-Object FullName, Length, LastWriteTime
+              - name: Install ImageMagick
+                run: choco install imagemagick --yes
                 shell: pwsh
+    
+              - name: Convert the PNG to an Icon using ImageMagick
+                run: magick convert favicon.png favicon.ico
+
 
               - name: Compile installer.ps1 to installer.exe
                 run: |
