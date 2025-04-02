@@ -61,7 +61,7 @@ jobs:
                   echo "version=${{ env.message }}" >> $GITHUB_ENV
                 else
                   echo "is_version=false" >> $GITHUB_ENV
-
+                fi
             - name: Create release
               if: env.is_version == 'true'
               uses: actions/create-release@v1
