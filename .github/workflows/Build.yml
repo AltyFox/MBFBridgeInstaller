@@ -24,7 +24,7 @@ jobs:
                 shell: pwsh
     
               - name: Convert the PNG to an Icon using ImageMagick
-                run: magick convert favicon.png favicon.ico
+                run: magick favicon.png favicon.ico
 
 
               - name: Compile installer.ps1 to installer.exe
