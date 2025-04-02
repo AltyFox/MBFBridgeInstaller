@@ -38,8 +38,8 @@ jobs:
                   $iconBase64 = [Convert]::ToBase64String((Get-Content .\favicon.ico -AsByteStream))
                   $content = Get-Content .\installer.ps1
 
-                  [regex]$pattern = "name"
-                  $content.replace("ICON_PLACEHOLDER", $iconBase64, 1)
+                  [regex]$pattern = "ICON_PLACEHOLDER"
+                  $pattern.replace($content, $iconBase64, 1)
                   Set-Content .\installer_with_icon.ps1 $content
                   $lineWithIconBase64 = $content | Select-String -Pattern '\$iconBase64'
                   Write-Output $lineWithIconBase64
