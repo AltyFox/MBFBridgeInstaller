@@ -1,0 +1,41 @@
+name: Build MBF Bridge Installer
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    build:
+        runs-on: windows-latest
+
+        steps:
+        - name: Checkout code
+            uses: actions/checkout@v3
+
+        - name: Set up PowerShell
+            shell: pwsh
+            run: |
+                # Download the PNG
+                Invoke-WebRequest -Uri "https://mbf.bsquest.xyz/favicon.png" -OutFile "favicon.png"
+
+                # Convert PNG to ICO
+                Add-Type -AssemblyName System.Drawing
+                $png = [System.Drawing.Image]::FromFile("favicon.png")
+                $icon = [System.Drawing.Icon]::FromHandle($png.GetHicon())
+                $icon.Save([System.IO.File]::Create("favicon.ico"))
+                $icon.Dispose()
+                $png.Dispose()
+
+                # Create a sample PowerShell script
+                Set-Content -Path "MBF_Bridge.ps1" -Value 'Write-Host "Hello, MBF Bridge Installer!"'
+
+                # Compile the PowerShell script into an EXE with the icon
+                Install-Module -Name ps2exe -Force -Scope CurrentUser
+                ps2exe -inputFile "MBF_Bridge.ps1" -outputFile "MBF_Bridge_Installer.exe" -iconFile "favicon.ico"
+
+        - name: Upload artifact
+            uses: actions/upload-artifact@v3
+            with:
+                name: MBF_Bridge_Installer
+                path: MBF_Bridge_Installer.exe
