@@ -13,17 +13,22 @@ jobs:
         steps:
               - name: Checkout repository
                 uses: actions/checkout@v4
+
+              - name: Install and cache PowerShell modules
+                id: psmodulecache
+                uses: potatoqualitee/psmodulecache@v6.0
+                with:
+                  modules-to-cache: ps2exe
+              - name: Show that the Action works
+                shell: powershell
+                run: |
+                    Get-Module -Name ps2exe -ListAvailable | Select Path
+                    Import-Module ps2exe
     
               - name: Download favicon.png
                 run: |
                   Invoke-WebRequest -Uri "https://mbf.bsquest.xyz/favicon.png" -OutFile "favicon.png"
                 shell: pwsh
-
-              - name: Install and cache PowerShell modules
-                uses: potatoqualitee/psmodulecache@v6.0
-                with:
-                  modules-to-cache: ps2exe
-                  updatable: true
 
               - name: Install ImageMagick
                 run: choco install imagemagick --yes
