@@ -19,14 +19,15 @@ jobs:
                   Invoke-WebRequest -Uri "https://mbf.bsquest.xyz/favicon.png" -OutFile "favicon.png"
                 shell: pwsh
     
-              - name: Install ImageMagick
+              - name: Download ConvertTo-Icon.ps1 script
                 run: |
-                  choco install imagemagick --force
+                  Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nickrod518/PowerShell-Scripts/refs/heads/master/Data/ConvertTo-Icon.ps1" -OutFile "ConvertTo-Icon.ps1"
                 shell: pwsh
-    
-              - name: Convert PNG to ICO using ImageMagick
+
+              - name: Convert PNG to ICO using ConvertTo-Icon.ps1
                 run: |
-                  magick convert favicon.png -define icon:auto-resize=16,32,48,64,128,256 favicon.ico
+                  . .\ConvertTo-Icon.ps1
+                  ConvertTo-Icon -FilePath "favicon.png"
                 shell: pwsh
     
               - name: Install ps2exe
