@@ -62,7 +62,9 @@ jobs:
                     VERSION="${BASH_REMATCH[1]}"
                     RELEASE_NOTES=$(echo "$COMMIT_MESSAGE" | sed -e "1d")
                     echo "version=$VERSION" >> $GITHUB_ENV
-                    echo "release_notes=$RELEASE_NOTES" >> $GITHUB_ENV
+                    echo "release_notes<<EOF" >> $GITHUB_ENV
+                    echo "$RELEASE_NOTES" >> $GITHUB_ENV
+                    echo "EOF" >> $GITHUB_ENV
                   else
                     echo "No version tag found in commit message."
                     exit 0
