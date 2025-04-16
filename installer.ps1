@@ -7,7 +7,7 @@ Invoke-WebRequest -Uri $jsonUrl -OutFile $jsonFilePath
 $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
 $bridgeDownloadUrl = $jsonContent."bridge-download-url"
 # Create a variable for the base64 icon
-$version = "v1.0.6"
+$version = "v1.0.7"
 
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -60,6 +60,15 @@ $form.Controls.Add($startButton)
 
 $appDataDir = Join-Path $env:APPDATA "mbf_tools"
 
+
+
+# Helper function for logging
+Function Log-Message($message) {
+    $timestamp = Get-Date -Format "HH:mm:ss"
+    $outputBox.AppendText("`r`n[$timestamp] $message")
+    $outputBox.ScrollToCaret()
+}
+
 if (-not (Test-Path $appDataDir)) {
     Log-Message "Creating application data directory at: $appDataDir"
     New-Item -ItemType Directory -Path $appDataDir | Out-Null
@@ -86,14 +95,6 @@ if (-not (Test-Path $appDataDir)) {
 
 
 
-
-
-# Helper function for logging
-Function Log-Message($message) {
-    $timestamp = Get-Date -Format "HH:mm:ss"
-    $outputBox.AppendText("`r`n[$timestamp] $message")
-    $outputBox.ScrollToCaret()
-}
 
 # Function to download a file with progress
 
