@@ -60,6 +60,14 @@ $form.Controls.Add($startButton)
 
 $appDataDir = Join-Path $env:APPDATA "mbf_tools"
 
+if (-not (Test-Path $appDataDir)) {
+    Log-Message "Creating application data directory at: $appDataDir"
+    New-Item -ItemType Directory -Path $appDataDir | Out-Null
+} else {
+    Log-Message "Application data directory already exists at: $appDataDir"
+}
+
+
 
 
 
