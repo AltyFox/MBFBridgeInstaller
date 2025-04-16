@@ -7,14 +7,14 @@ Invoke-WebRequest -Uri $jsonUrl -OutFile $jsonFilePath
 $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
 $bridgeDownloadUrl = $jsonContent."bridge-download-url"
 # Create a variable for the base64 icon
-
+$version = "v1.0.5"
 
 
 Add-Type -AssemblyName System.Windows.Forms
 
 # Create Form
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "MBF Bridge Installer"
+$form.Text = "MBF Bridge Installer $version"
 $form.Size = New-Object System.Drawing.Size(800, 500)
 $form.StartPosition = "CenterScreen"
 
