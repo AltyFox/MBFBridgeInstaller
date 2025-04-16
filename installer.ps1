@@ -7,7 +7,7 @@ Invoke-WebRequest -Uri $jsonUrl -OutFile $jsonFilePath
 $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
 $bridgeDownloadUrl = $jsonContent."bridge-download-url"
 # Create a variable for the base64 icon
-$version = "v1.0.7"
+$version = "v1.0.8"
 
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -75,20 +75,20 @@ if (-not (Test-Path $appDataDir)) {
 } else {
     Log-Message "Application data directory already exists at: $appDataDir"
 
-    # Kill any running adb.exe processes
-    $adbProcesses = Get-Process -Name "adb" -ErrorAction SilentlyContinue
-    if ($adbProcesses) {
-        Log-Message "Terminating running instances of adb.exe."
-        $adbProcesses | ForEach-Object { Stop-Process -Id $_.Id -Force }
-        Log-Message "All running instances of adb.exe have been terminated."
-    } else {
-        Log-Message "No running instances of adb.exe found."
-    }
-
     # Delete all contents of the directory
     Log-Message "Clearing contents of $appDataDir"
     Get-ChildItem -Path $appDataDir -Recurse -Force | Remove-Item -Force -Recurse
     Log-Message "Contents of $appDataDir have been cleared."
+}
+
+# Kill any running adb.exe processes
+$adbProcesses = Get-Process -Name "adb" -ErrorAction SilentlyContinue
+if ($adbProcesses) {
+    Log-Message "Terminating running instances of adb.exe."
+    $adbProcesses | ForEach-Object { Stop-Process -Id $_.Id -Force }
+    Log-Message "All running instances of adb.exe have been terminated."
+} else {
+    Log-Message "No running instances of adb.exe found."
 }
 
 
@@ -225,16 +225,6 @@ $startButton.Add_Click({
             Log-Message "No running instances of $processName found."
         }
 
-        # Kill any running instance of adb.exe
-        $adbProcesses = Get-Process -Name "adb" -ErrorAction SilentlyContinue
-        if ($adbProcesses) {
-            Log-Message "Terminating running instances of adb.exe."
-            $adbProcesses | ForEach-Object { Stop-Process -Id $_.Id -Force }
-            Log-Message "All running instances of adb.exe have been terminated."
-        }
-        else {
-            Log-Message "No running instances of adb.exe found."
-        }
 
 
         $saveFileDialog = New-Object System.Windows.Forms.SaveFileDialog
