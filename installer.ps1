@@ -7,7 +7,7 @@ Invoke-WebRequest -Uri $jsonUrl -OutFile $jsonFilePath
 $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
 $bridgeDownloadUrl = $jsonContent."bridge-download-url"
 # Create a variable for the base64 icon
-$version = "v1.0.2"
+$version = "v1.0.5"
 
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -60,11 +60,9 @@ $form.Controls.Add($startButton)
 
 $appDataDir = Join-Path $env:APPDATA "mbf_tools"
 
+# Create the directory if it doesn't exist
 if (-not (Test-Path $appDataDir)) {
-    Log-Message "Creating application data directory at: $appDataDir"
     New-Item -ItemType Directory -Path $appDataDir | Out-Null
-} else {
-    Log-Message "Application data directory already exists at: $appDataDir"
 }
 
 
