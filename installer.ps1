@@ -7,7 +7,7 @@ Invoke-WebRequest -Uri $jsonUrl -OutFile $jsonFilePath
 $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
 $bridgeDownloadUrl = $jsonContent."bridge-download-url"
 # Create a variable for the base64 icon
-$version = "v1.0.5"
+$version = "v1.0.6"
 
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -60,10 +60,28 @@ $form.Controls.Add($startButton)
 
 $appDataDir = Join-Path $env:APPDATA "mbf_tools"
 
-# Create the directory if it doesn't exist
 if (-not (Test-Path $appDataDir)) {
+    Log-Message "Creating application data directory at: $appDataDir"
     New-Item -ItemType Directory -Path $appDataDir | Out-Null
+} else {
+    Log-Message "Application data directory already exists at: $appDataDir"
+
+    # Kill any running adb.exe processes
+    $adbProcesses = Get-Process -Name "adb" -ErrorAction SilentlyContinue
+    if ($adbProcesses) {
+        Log-Message "Terminating running instances of adb.exe."
+        $adbProcesses | ForEach-Object { Stop-Process -Id $_.Id -Force }
+        Log-Message "All running instances of adb.exe have been terminated."
+    } else {
+        Log-Message "No running instances of adb.exe found."
+    }
+
+    # Delete all contents of the directory
+    Log-Message "Clearing contents of $appDataDir"
+    Get-ChildItem -Path $appDataDir -Recurse -Force | Remove-Item -Force -Recurse
+    Log-Message "Contents of $appDataDir have been cleared."
 }
+
 
 
 
@@ -131,21 +149,12 @@ $startButton.Add_Click({
         Log-Message "Downloading the USB driver needed to access your Quest"
         $androidUSBPath = "$appDataDir\AndroidUSB.zip"
 
-        # Delete existing AndroidUSB.zip if it exists
-        if (Test-Path $androidUSBPath) {
-            Log-Message "Deleting existing AndroidUSB.zip"
-            Remove-Item $androidUSBPath -Force
-        }
+
 
         DownloadFile "https://github.com/AltyFox/MBFLauncherAutoInstaller/raw/refs/heads/main/AndroidUSB.zip" $androidUSBPath
 
         $androidUSBExtractPath = "$appDataDir\AndroidUSB"
 
-        # Delete existing AndroidUSB extraction folder if it exists
-        if (Test-Path $androidUSBExtractPath) {
-            Log-Message "Deleting existing AndroidUSB directory"
-            Remove-Item $androidUSBExtractPath -Recurse -Force
-        }
 
         Log-Message "Extracting AndroidUSB.zip to: $androidUSBExtractPath"
         Expand-Archive -Path $androidUSBPath -DestinationPath $androidUSBExtractPath -Force
@@ -178,11 +187,6 @@ $startButton.Add_Click({
 
         $bridgeExtractPath = "$appDataDir\MBFBridge"
 
-        # Delete existing MBFBridge folder if it exists
-        if (Test-Path $bridgeExtractPath) {
-            Log-Message "Deleting existing MBFBridge directory"
-            Remove-Item $bridgeExtractPath -Recurse -Force
-        }
 
         Log-Message "Extracting MBFBridge.zip to temporary directory."
         Expand-Archive -Path $bridgeZipPath -DestinationPath $bridgeExtractPath -Force
