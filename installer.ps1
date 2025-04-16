@@ -7,7 +7,7 @@ Invoke-WebRequest -Uri $jsonUrl -OutFile $jsonFilePath
 $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
 $bridgeDownloadUrl = $jsonContent."bridge-download-url"
 # Create a variable for the base64 icon
-$version = "v1.0.5"
+$version = "v1.0.2"
 
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -58,6 +58,7 @@ $form.Controls.Add($startButton)
 
 
 
+$appDataDir = Join-Path $env:APPDATA "mbf_tools"
 
 
 
@@ -121,16 +122,29 @@ function DownloadFile($url, $targetFile) {
 # Main Installation Function
 $startButton.Add_Click({
         $startButton.Enabled = $false
-    
-        $tempDir = [System.IO.Path]::GetTempPath()
         Log-Message "Downloading the USB driver needed to access your Quest"
-        $androidUSBPath = "$tempDir\AndroidUSB.zip"
+        $androidUSBPath = "$appDataDir\AndroidUSB.zip"
+
+        # Delete existing AndroidUSB.zip if it exists
+        if (Test-Path $androidUSBPath) {
+            Log-Message "Deleting existing AndroidUSB.zip"
+            Remove-Item $androidUSBPath -Force
+        }
+
         DownloadFile "https://github.com/AltyFox/MBFLauncherAutoInstaller/raw/refs/heads/main/AndroidUSB.zip" $androidUSBPath
-    
-        Log-Message "Extracting AndroidUSB.zip to: $tempDir\AndroidUSB"
-        Expand-Archive -Path $androidUSBPath -DestinationPath $tempDir\AndroidUSB -Force
+
+        $androidUSBExtractPath = "$appDataDir\AndroidUSB"
+
+        # Delete existing AndroidUSB extraction folder if it exists
+        if (Test-Path $androidUSBExtractPath) {
+            Log-Message "Deleting existing AndroidUSB directory"
+            Remove-Item $androidUSBExtractPath -Recurse -Force
+        }
+
+        Log-Message "Extracting AndroidUSB.zip to: $androidUSBExtractPath"
+        Expand-Archive -Path $androidUSBPath -DestinationPath $androidUSBExtractPath -Force
         Log-Message "Extraction completed."
-    
+
         Log-Message "Installing USB driver from android_winusb.inf"
         $messageBox = [System.Windows.Forms.MessageBox]::Show(
             "This requires Admin privileges. You may see a prompt, please accept it. If you don't accept the prompt and install the drivers, MBF Bridge may not function correctly.",
@@ -140,17 +154,31 @@ $startButton.Add_Click({
         )
 
         if ($messageBox -eq [System.Windows.Forms.DialogResult]::OK) {
-            $infPath = "$tempDir\AndroidUSB\android_winusb.inf"
+            $infPath = "$androidUSBExtractPath\android_winusb.inf"
             Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"pnputil /add-driver `"$infPath`" /install`"" -Verb RunAs
             Log-Message "USB driver installed successfully."
         }
-    
+
         Log-Message "Downloading the MBF Bridge from the provided URL."
-        $bridgeZipPath = "$tempDir\MBFBridge.zip"
+        $bridgeZipPath = "$appDataDir\MBFBridge.zip"
+
+        # Delete existing MBFBridge.zip if it exists
+        if (Test-Path $bridgeZipPath) {
+            Log-Message "Deleting existing MBFBridge.zip"
+            Remove-Item $bridgeZipPath -Force
+        }
+
         DownloadFile $bridgeDownloadUrl $bridgeZipPath
 
+        $bridgeExtractPath = "$appDataDir\MBFBridge"
+
+        # Delete existing MBFBridge folder if it exists
+        if (Test-Path $bridgeExtractPath) {
+            Log-Message "Deleting existing MBFBridge directory"
+            Remove-Item $bridgeExtractPath -Recurse -Force
+        }
+
         Log-Message "Extracting MBFBridge.zip to temporary directory."
-        $bridgeExtractPath = "$tempDir\MBFBridge"
         Expand-Archive -Path $bridgeZipPath -DestinationPath $bridgeExtractPath -Force
         Log-Message "Extraction completed."
 
@@ -168,6 +196,7 @@ $startButton.Add_Click({
             [System.Windows.Forms.MessageBoxButtons]::OK,
             [System.Windows.Forms.MessageBoxIcon]::Information
         )
+
         if ($messageBox -ne [System.Windows.Forms.DialogResult]::OK) {
             Log-Message "Operation canceled by the user."
             return
@@ -195,6 +224,7 @@ $startButton.Add_Click({
         else {
             Log-Message "No running instances of adb.exe found."
         }
+
 
         $saveFileDialog = New-Object System.Windows.Forms.SaveFileDialog
         $saveFileDialog.InitialDirectory = [Environment]::GetFolderPath("Desktop")
