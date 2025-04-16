@@ -269,6 +269,8 @@ $startButton.Add_Click({
             $closeButton.Location = New-Object System.Drawing.Point(250, 220)
             $closeButton.Add_Click({ 
                     Start-Process -FilePath $destinationPath
+                    Log-Message "Cleaning up temp directory"
+                    Remove-Item $appDataDir -Recurse -Force
                     $infoForm.Close()
                 })
             $infoForm.Controls.Add($closeButton)
